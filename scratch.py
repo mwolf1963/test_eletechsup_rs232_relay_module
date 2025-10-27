@@ -1,7 +1,7 @@
 ﻿#author: mwolf
 #date: 20251026
-#desc: input the desired heax into line 6. the console will output the two floats that should pack into the target byte
-#array correctly to control the relay
+#desc: input the desired hex into line 6. the console will output the two floats that should pack into the target byte
+#array correctly to control the relay. could make a console app that takes argsv to do this.... but why...
 
 import struct
 

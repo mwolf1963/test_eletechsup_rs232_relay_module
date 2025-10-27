@@ -13,3 +13,4 @@ cd dist
 move main.exe "RS232 Relay Test.exe"
 echo .exe file created.
 pause
+@echo on
