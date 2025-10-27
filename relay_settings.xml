@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='utf-8'?>
+<relay_settings>
+  <channel id="1">
+    <action type="momentary">
+      <format type="hex"> 0x55 0x56 0x00 0x00 0x00 0x01 0x04 0xB0</format>
+      <format type="binary">00000101010101010110000000000000000000000000000000010000010010110000</format>
+      <format type="c_float">
+        <float id="1">3.097009736004278e-41</float>
+        <float id="2">-4.802274133908213e-10</float>
+      </format>
+    </action>
+    <action type="open">
+      <format type="hex">0x55 0x56 0x00 0x00 0x00 0x01 0x01 0xAD</format>
+      <format type="binary">0101010101010110000000000000000000000000000000010000000110101101</format>
+      <format type="c_float">
+        <float id="1">3.097009736004278e-41</float>
+        <float id="2">-7.333023077649159e-12</float>
+      </format>
+    </action>
+    <action type="close">
+      <format type="hex">0x55 0x56 0x00 0x00 0x00 0x01 0x02 0xAE</format>
+      <format type="binary">0101010101010110000000000000000000000000000000010000001010101110</format>
+      <format type="c_float">
+        <float id="1">3.097009736004278e-41</float>
+        <float id="2">-2.955946598603987e-11</float>
+      </format>
+    </action>
+    <action type="toggle">
+      <format type="hex">0x55 0x56 0x00 0x00 0x00 0x01 0x03 0xAF</format>
+      <format type="binary">0101010101010110000000000000000000000000000000010000001110101111</format>
+      <format type="c_float">
+        <float id="1">3.097009736004278e-41</float>
+        <float id="2">-1.191473586459324e-10</float>
+      </format>
+    </action>
+  </channel>
+  <channel id="2">
+    <action type="momentary">
+      <format type="hex">0x55 0x56 0x00 0x00 0x00 0x02 0x04 0xB1</format>
+      <format type="binary">0101010101010110000000000000000000000000000000100000010010110001</format>
+      <format type="c_float">
+        <float id="1">3.097009736004278e-41</float>
+        <float id="2">-1.920966496982146e-09</float>
+      </format>
+    </action>
+    <action type="open">
+      <format type="hex">0x55 0x56 0x00 0x00 0x00 0x02 0x01 0xAE</format>
+      <format type="binary">0101010101010110000000000000000000000000000000100000000110101110</format>
+      <format type="c_float">
+        <float id="1">3.097009736004278e-41</float>
+        <float id="2">-2.9332980489016336e-11</float>
+      </format>
+    </action>
+    <action type="close">
+      <format type="hex">0x55 0x56 0x00 0x00 0x00 0x02 0x02 0xAF</format>
+      <format type="binary">0101010101010110000000000000000000000000000000100000001010101111</format>
+      <format type="c_float">
+        <float id="1">3.097009736004278e-41</float>
+        <float id="2">-1.1824141665783827e-10</float>
+      </format>
+    </action>
+    <action type="toggle">
+      <format type="hex">0x55 0x56 0x00 0x00 0x00 0x02 0x03 0xB0</format>
+      <format type="binary">0101010101010110000000000000000000000000000000100000001110110000</format>
+      <format type="c_float">
+        <float id="1">3.097009736004278e-41</float>
+        <float id="2">-4.766036454384448e-10</float>
+      </format>
+    </action>
+  </channel>
+</relay_settings>
