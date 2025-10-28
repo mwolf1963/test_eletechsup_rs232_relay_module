@@ -1,4 +1,9 @@
-﻿import wx
+﻿#author: mwolf
+#date: 20261028
+#desc: main file for relay control. all gui functionality is contained here and it uses the FTDI .dll to communicate
+# with the device.
+
+import wx
 import xml.etree.ElementTree as ET
 import os
 import serial.tools.list_ports
