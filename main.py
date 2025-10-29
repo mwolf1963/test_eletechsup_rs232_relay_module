@@ -22,9 +22,7 @@ TIMEOUT = 1
 
 
 def get_all_com_ports():
-    """Get all COM ports including those in use"""
     ports = []
-    # Try serial.tools.list_ports first
     detected_ports = serial.tools.list_ports.comports()
     for port in detected_ports:
         if port.description and port.description != port.device and port.description != "n/a":
@@ -54,29 +52,21 @@ def get_all_com_ports():
                     ports.append(rport)
         except:
             pass
-
     return ports if ports else ["No ports found"]
 
 
 def convert_to_bytes(format_type, data, float1=None, float2=None):
-    """Convert stored data to bytes based on format type"""
     try:
         if format_type == "hex":
-            # Parse hex string: "0x55 0x56 0x00" or "55 56 00" or "555600"
             if not data:
                 return b''
-            # Remove "0x" prefixes and spaces
             hex_str = data.replace('0x', '').replace(' ', '')
-            # Convert hex string to bytes
             return bytes.fromhex(hex_str)
 
         elif format_type == "binary":
-            # Parse binary string: "01010101 01010110" or "0101010101010110"
             if not data:
                 return b''
-            # Remove spaces
             binary_str = data.replace(' ', '')
-            # Convert binary string to bytes (8 bits at a time)
             byte_list = []
             for i in range(0, len(binary_str), 8):
                 byte_chunk = binary_str[i:i + 8]
@@ -85,38 +75,28 @@ def convert_to_bytes(format_type, data, float1=None, float2=None):
             return bytes(byte_list)
 
         elif format_type == "32 bit float":
-            # Convert two 32-bit floats to 8 bytes
             if not float1 or not float2:
                 return b''
-
             result_bytes = b''
-
-            # Process each float
             for float_str in [float1, float2]:
-                # Check if it's hex bytes (8 hex chars = 4 bytes)
                 if len(float_str.replace(' ', '').replace('0x', '')) == 8 and all(
                         c in '0123456789abcdefABCDEF x' for c in float_str):
-                    # It's hex bytes - convert directly
                     hex_clean = float_str.replace(' ', '').replace('0x', '')
                     result_bytes += bytes.fromhex(hex_clean)
                 else:
-                    # It's a float value - pack it
                     try:
                         f_val = eval(float_str) if float_str.startswith('(') else float(float_str)
                         result_bytes += struct.pack('<f', f_val)
                     except:
                         f_val = float(float_str)
                         result_bytes += struct.pack('<f', f_val)
-
             print(f"DEBUG: Float1 input={float1!r}")
             print(f"DEBUG: Float2 input={float2!r}")
             print(f"DEBUG: Combined result: {result_bytes.hex()}")
 
             return result_bytes
-
         else:
             return b''
-
     except Exception as e:
         print(f"Error converting {format_type} data: {e}")
         return b''
@@ -128,21 +108,17 @@ class SettingsManager:
         self.load_settings()
 
     def load_settings(self):
-        """Load settings from XML file or create default if doesn't exist"""
         if os.path.exists(CONFIG_FILE):
             try:
                 tree = ET.parse(CONFIG_FILE)
                 root = tree.getroot()
-
                 for channel_elem in root.findall('channel'):
                     channel = channel_elem.get('id')
                     for action_elem in channel_elem.findall('action'):
                         action = action_elem.get('type')
                         for format_elem in action_elem.findall('format'):
                             format_type = format_elem.get('type')
-
                             if format_type == 'c_float':
-                                # Load two floats
                                 for float_elem in format_elem.findall('float'):
                                     float_id = float_elem.get('id')
                                     value = float_elem.text or ""
@@ -162,24 +138,20 @@ class SettingsManager:
             self.save_settings()
 
     def create_default_settings(self):
-        """Create default settings structure"""
         for channel in [1, 2]:
             for action in ['momentary', 'open', 'close', 'toggle']:
                 for format_type in ['hex', 'binary']:
                     key = f"ch{channel}_{action}_{format_type}"
                     self.settings[key] = ""
-                # Two floats for c_float type
                 for float_num in [1, 2]:
                     key = f"ch{channel}_{action}_c_float_{float_num}"
                     self.settings[key] = ""
 
     def save_settings(self):
-        """Save settings to XML file"""
         root = ET.Element('relay_settings')
 
         for channel in [1, 2]:
             channel_elem = ET.SubElement(root, 'channel', id=str(channel))
-
             for action in ['momentary', 'open', 'close', 'toggle']:
                 action_elem = ET.SubElement(channel_elem, 'action', type=action)
 
@@ -187,8 +159,6 @@ class SettingsManager:
                     key = f"ch{channel}_{action}_{format_type}"
                     format_elem = ET.SubElement(action_elem, 'format', type=format_type)
                     format_elem.text = self.settings.get(key, '')
-
-                # Two floats for c_float type
                 c_float_elem = ET.SubElement(action_elem, 'format', type='c_float')
                 for float_num in [1, 2]:
                     key = f"ch{channel}_{action}_c_float_{float_num}"
@@ -214,25 +184,18 @@ class SettingsManager:
 class SettingsDialog(wx.Dialog):
     def __init__(self, parent, settings_manager):
         super().__init__(parent, title="Command Settings", size=(600, 650))
-
         self.settings_manager = settings_manager
         self.temp_settings = {}
-
-        # Copy current settings to temp
         for key in settings_manager.settings:
             self.temp_settings[key] = settings_manager.get(key)
 
         panel = wx.Panel(self)
         main_sizer = wx.BoxSizer(wx.VERTICAL)
-
-        # Create scrolled window for settings
         scroll = wx.ScrolledWindow(panel)
         scroll.SetScrollRate(5, 5)
         scroll_sizer = wx.BoxSizer(wx.VERTICAL)
 
         self.text_ctrls = {}
-
-        # Add text controls for each command
         for channel in [1, 2]:
             channel_label = wx.StaticText(scroll, label=f"Channel {channel}")
             font = channel_label.GetFont()
@@ -259,7 +222,6 @@ class SettingsDialog(wx.Dialog):
 
                     self.text_ctrls[key] = text_ctrl
 
-                # Two 32-bit floats
                 label = wx.StaticText(scroll, label=f"    32 BIT FLOAT:")
                 scroll_sizer.Add(label, 0, wx.LEFT | wx.TOP, 10)
 
@@ -282,8 +244,6 @@ class SettingsDialog(wx.Dialog):
 
         scroll.SetSizer(scroll_sizer)
         main_sizer.Add(scroll, 1, wx.EXPAND | wx.ALL, 10)
-
-        # Buttons
         btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
         save_exit_btn = wx.Button(panel, label="Save and Exit")
         cancel_btn = wx.Button(panel, wx.ID_CANCEL, "Cancel")
@@ -297,19 +257,13 @@ class SettingsDialog(wx.Dialog):
         save_exit_btn.Bind(wx.EVT_BUTTON, self.on_save_exit)
 
     def on_save_exit(self, event):
-        # Update temp settings from text controls
         for key, ctrl in self.text_ctrls.items():
             value = ctrl.GetValue()
-
-            # For c_float type, just validate and store as-is (can be float or hex)
             if '_c_float_' in key and value:
-                # Check if it's hex format
                 clean_val = value.replace(' ', '').replace('0x', '')
                 if len(clean_val) == 8 and all(c in '0123456789abcdefABCDEF' for c in clean_val):
-                    # It's hex - store as-is
                     self.temp_settings[key] = value
                 else:
-                    # It's a float - validate and store
                     try:
                         float(value)
                         self.temp_settings[key] = value
@@ -319,8 +273,6 @@ class SettingsDialog(wx.Dialog):
                         return
             else:
                 self.temp_settings[key] = value
-
-        # Save to settings manager and file
         self.settings_manager.update_all(self.temp_settings)
 
         self.EndModal(wx.ID_OK)
@@ -333,13 +285,10 @@ class ChannelControlPanel(wx.Panel):
         self.on_command = on_command
 
         sizer = wx.BoxSizer(wx.VERTICAL)
-
-        # Channel label
         label = wx.StaticText(self, label=f"Channel {channel_num}")
         label.SetFont(label.GetFont().Bold())
         sizer.Add(label, 0, wx.ALIGN_CENTER | wx.ALL, 5)
 
-        # Buttons
         for action in ['Momentary', 'Open', 'Close', 'Toggle']:
             btn = wx.Button(self, label=action)
             btn.Bind(wx.EVT_BUTTON, lambda e, a=action.lower(): self.on_button_click(a))
@@ -391,20 +340,16 @@ class RelayControlFrame(wx.Frame):
         self.com_open = False
         self.ser = None
 
-        # Initialize settings manager (loads from XML or creates default)
         self.settings_manager = SettingsManager()
 
         panel = wx.Panel(self)
         main_sizer = wx.BoxSizer(wx.VERTICAL)
 
-        # Top control bar
         top_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        # COM port section
         com_label = wx.StaticText(panel, label="COM:")
         top_sizer.Add(com_label, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
 
-        # Get all COM ports
         self.available_ports = get_all_com_ports()
 
         self.com_choice = wx.Choice(panel, choices=self.available_ports, size=(300, -1))
@@ -418,14 +363,12 @@ class RelayControlFrame(wx.Frame):
 
         top_sizer.AddStretchSpacer()
 
-        # Settings button
         settings_btn = wx.Button(panel, label="Settings")
         settings_btn.Bind(wx.EVT_BUTTON, self.on_settings)
         top_sizer.Add(settings_btn, 0, wx.ALIGN_CENTER_VERTICAL | wx.ALL, 5)
 
         main_sizer.Add(top_sizer, 0, wx.EXPAND | wx.ALL, 10)
 
-        # Format regions
         self.hex_region = FormatRegionPanel(panel, "hex", self.on_command)
         main_sizer.Add(self.hex_region, 1, wx.EXPAND | wx.ALL, 10)
 
@@ -435,7 +378,6 @@ class RelayControlFrame(wx.Frame):
         self.string_region = FormatRegionPanel(panel, "32 bit float", self.on_command)
         main_sizer.Add(self.string_region, 1, wx.EXPAND | wx.ALL, 10)
 
-        # Sent display section at bottom
         sent_sizer = wx.BoxSizer(wx.HORIZONTAL)
         sent_label = wx.StaticText(panel, label="Sent:")
         font = sent_label.GetFont()
@@ -461,12 +403,10 @@ class RelayControlFrame(wx.Frame):
             self.com_btn.SetLabel("Open")
             self.com_choice.Enable()
             selected_port = self.com_choice.GetStringSelection()
-            # Extract just the COM port name (before the dash if present)
             port_name = selected_port.split(' - ')[0] if ' - ' in selected_port else selected_port
             print(f"Closed {port_name}")
         else:
             com_port = self.com_choice.GetStringSelection()
-            # Extract just the COM port name (before the dash if present)
             port_name = com_port.split(' - ')[0] if ' - ' in com_port else com_port
             if com_port and com_port != "No ports found":
                 try:
@@ -497,7 +437,6 @@ class RelayControlFrame(wx.Frame):
         dlg.Destroy()
 
     def on_command(self, channel, action, format_type):
-        # Get data based on format type
         if format_type == "32 bit float":
             # Get both floats
             key1 = f"ch{channel}_{action}_c_float_1"
@@ -506,7 +445,6 @@ class RelayControlFrame(wx.Frame):
             float2 = self.settings_manager.get(key2, '')
             display_command = f"Float1: {float1}, Float2: {float2}"
 
-            # Convert to bytes
             byte_data = convert_to_bytes(format_type, None, float1, float2)
         else:
             format_key = format_type
@@ -514,10 +452,8 @@ class RelayControlFrame(wx.Frame):
             command_str = self.settings_manager.get(key, '')
             display_command = command_str
 
-            # Convert to bytes
             byte_data = convert_to_bytes(format_type, command_str)
 
-        # Display button click
         button_name = f"Channel {channel} - {action.capitalize()} - {format_type.upper()}"
         display_text = f"Button [{button_name}] clicked"
         if display_command:
